@@ -1,26 +1,40 @@
-// This is calling a local file,
-// but the syntax is pretty much the same as a remote URL
-const getJSON = async () => {
-    const data = await fetch('./data/flight_logs.json').then((response) =>
-        response.json()
-    );
-    return data;
-};
-
-// We can make the anonymous callback function async
-// then we can use await to get our array
 document.addEventListener('DOMContentLoaded', async () => {
-    const myArray = await getJSON();
-    console.log(myArray);
+    try {
+        // Function to fetch JSON data
+        const getJSON = async () => {
+            const response = await fetch('./data/flight_logs.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        };
 
-    // Sort and return the data based on the airline
-    // hint: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#sorting_array_of_objects
+        // Fetch the JSON data
+        const flightData = await getJSON();
+        console.log('Original data:', flightData);
 
-    // Sort and return the data based on the arrival airport
+        // Level 1: Sort and return the data based on the airline
+        const sortedByAirline = [...flightData].sort((a, b) => 
+            a.airline.localeCompare(b.airline)
+        );
+        console.log('Sorted by airline:', sortedByAirline);
 
-    // Filter out everything but the flights made by Delta, return the new data
-    // hint: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter#filtering_invalid_entries_from_json
+        // Level 1: Sort and return the data based on the arrival airport
+        const sortedByArrivalAirport = [...flightData].sort((a, b) => 
+            a.arrival_airport.localeCompare(b.arrival_airport)
+        );
+        console.log('Sorted by arrival airport:', sortedByArrivalAirport);
 
-    // Do the same as before, but try doing it with reduce() instead of filter
-    // hint: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce#sum_of_values_in_an_object_array
+        // Level 2: Filter out everything but the flights made by Delta
+        const deltaFlights = flightData.filter(flight => flight.airline === 'Delta');
+        console.log('Delta flights:', deltaFlights);
+
+        // Additional logging to show the first few items of each result
+        console.log('First 5 flights sorted by airline:', sortedByAirline.slice(0, 5));
+        console.log('First 5 flights sorted by arrival airport:', sortedByArrivalAirport.slice(0, 5));
+        console.log('First 5 Delta flights:', deltaFlights.slice(0, 5));
+
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
 });
